@@ -1,5 +1,6 @@
 import br.com.dio.model.Board;
 import br.com.dio.model.Space;
+import br.com.dio.util.BoardTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ public class Main {
         var option = "";
 
         do {
+            System.out.println();
+            System.out.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
             System.out.println("Selecione uma das opções a seguir: ");
             System.out.println("1 - Iniciar um novo jogo");
             System.out.println("2 - Colocar um novo número");
@@ -77,19 +80,70 @@ public class Main {
     }
 
     private static void finishGame() {
+        if (board == null) {
+            System.out.println("Jogo deve ser iniciado");
+            return;
+        }
 
+        if (board.gameFinished()) {
+            System.out.println("Parabéns, jogo concluído!");
+            showCurrentGame();
+            board = null;
+        } else {
+            System.out.println("Não é possível finalizar!");
+            showGameStatus();
+        }
     }
 
     private static void clearGame() {
+        if (board == null) {
+            System.out.println("Jogo deve ser iniciado");
+            return;
+        }
 
+        System.out.println("Tem certeza que deseja reiniciar?");
+        var confirm = scanner.nextLine();
+
+        if (confirm.equalsIgnoreCase("s")) {
+            board.reset();
+            System.out.println("Reset realizado");
+            return;
+        }
+
+        System.out.println("Reset cancelado");
     }
 
     private static void showGameStatus() {
+        if (board == null) {
+            System.out.println("Jogo deve ser iniciado");
+            return;
+        }
 
+        System.out.printf("Status atual: %s\n", board.getStatus().toString());
+
+        if (board.hasErrors())
+            System.out.println("O jogo contém erros");
+        else
+            System.out.println("Jogo sem erros");
     }
 
     private static void showCurrentGame() {
+        if (board == null) {
+            System.out.println("Jogo deve ser iniciado");
+            return;
+        }
 
+        var args = new Object[81];
+        var argPos = 0;
+        for (int i = 0; i < BOARD_LIMIT; i++) {
+            for (var col : board.getSpaces()) {
+                var currentValue = col.get(i).getCurrent();
+                args[argPos++] = " " + (currentValue != null ? currentValue : " ");
+            }
+        }
+
+        System.out.println("Seu jogo se encontra da seguinte forma");
+        System.out.printf((BoardTemplate.BOARD_TEMPLATE) + "%n", args);
     }
 
     private static void removeNumber() {
@@ -101,15 +155,18 @@ public class Main {
         int min = 0;
         int max = 8;
 
-        System.out.println("Linha: ");
+        System.out.print("Linha - ");
         var row = getValidInt(min, max);
 
-        System.out.println("Coluna: ");
+        System.out.print("Coluna - ");
         var column = getValidInt(min, max);
 
         if (!board.clearValue(column, row)){
             System.out.println("A posição informada possui um valor fixo!");
+            return;
         }
+
+        System.out.println("Número removido!");
     }
 
     private static void inputNumber() {
@@ -121,13 +178,13 @@ public class Main {
         int min = 0;
         int max = 8;
 
-        System.out.println("Linha: ");
+        System.out.print("Linha - ");
         var row = getValidInt(min, max);
 
-        System.out.println("Coluna: ");
+        System.out.print("Coluna - ");
         var column = getValidInt(min, max);
 
-        System.out.printf("Informe o valor para a posição [%d, %d]\n", row, column);
+        System.out.printf("Informe o valor para a posição [%d, %d] - ", row, column);
         var value = getValidInt(1, 9);
 
         if (!board.changeValue(column, row, value)) {
@@ -144,6 +201,7 @@ public class Main {
                 if (retorno < min || retorno > max)
                     throw new Exception();
 
+                scanner.nextLine();
                 return retorno;
             } catch (Exception e) {
                 System.out.println("Número inválido!");

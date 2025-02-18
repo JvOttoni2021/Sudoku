@@ -25,13 +25,13 @@ public class Board {
     }
 
     public boolean changeValue(int column, int row, Integer value) {
-        Space space = spaces.get(row).get(column);
+        Space space = spaces.get(column).get(row);
         space.setCurrent(value);
         return !space.isFixed();
     }
 
     public boolean clearValue(int column, int row) {
-        Space space = spaces.get(row).get(column);
+        Space space = spaces.get(column).get(row);
         space.clearSpace();
         return !space.isFixed();
     }
@@ -44,7 +44,7 @@ public class Board {
         return !this.hasErrors() && this.getStatus() == GameStatusEnum.COMPLETE;
     }
 
-    private GameStatusEnum getStatus() {
+    public GameStatusEnum getStatus() {
         if (spaces.stream().flatMap(Collection::stream).noneMatch(x -> !x.isFixed() && x.getCurrent() != null)) {
             return GameStatusEnum.NON_STARTED;
         }
